@@ -1,0 +1,70 @@
+# AIMD-Chig eSCN-MD Training Configuration
+# Configuration for training eSCN-MD model on AIMD-Chig dataset
+
+# Data settings
+data:
+  root: "./data/smaller_Chig_AIMD"
+  split_npz: "scaffold.npz"
+  seed: 42
+
+# Model settings
+model:
+  # eSCN-MD architecture
+  num_elements: 90
+  sphere_channels: 128
+  lmax: 2
+  mmax: 2
+  cutoff: 5.0
+  max_neighbors: 170
+  num_layers: 3
+  hidden_channels: 128
+  edge_channels: 128
+  
+  # Enable/disable Ewald blocks (long-range interactions)
+  irreps: false  # Set to true to enable Ewald blocks
+
+# Ewald hyperparameters (only used when model.irreps = true)
+ewald_hyperparams:
+  # For non-PBC systems:
+  k_cutoff: 1.0
+  delta_k: 0.2
+  num_k_rbf: 128
+  downprojection: 8
+  num_hidden: 1
+
+# Training settings
+training:
+  epochs: 1000
+  batch_size: 2
+  eval_batch_size: 2
+  lr: 1.0e-4
+  weight_decay: 0.0
+  
+  # Loss weights
+  energy_weight: 1
+  force_weight: 100
+  
+  # Gradient clipping
+  clip_grad: 10.0
+  
+  # Learning rate warmup
+  warmup_steps: 1000
+  
+  # Logging
+  print_freq: 10
+  
+  # Data loading
+  num_workers: 4
+
+# Output settings
+output:
+  base_dir: "./runs_chig_escn"
+  ckpt_dir: "checkpoints"
+  log_dir: "logs"
+  save_last: true
+
+# System settings
+system:
+  cuda: true
+  num_workers: 4
+  deterministic: true

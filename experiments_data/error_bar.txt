@@ -1,0 +1,15 @@
+Charged Molecular Dimer:
+    eSCN:
+        Energy: [381.1, 359.2, 371.7]
+        Force: [28.1, 26.8, 27.5]
+    eSCN+EquiEwald:
+        Energy: [21.8, 49.9, 21.6]
+        Force: [5.8, 7.5, 7.9]
+
+Buckyball:
+    eSCN:
+        Energy: [36.0, 35.4, 31.3]
+        Force: [6.4, 6.5, 6.2]
+    eSCN+EquiEwald:
+        Energy: [18.1, 17.8, 17.8]
+        Force: [6.1, 6.2, 6.3]

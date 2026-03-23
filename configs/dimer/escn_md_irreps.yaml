@@ -1,0 +1,68 @@
+# Dimer eSCN-MD Irreps Training Configuration
+# Charged dimer interaction energy/forces with Ewald long-range
+
+# Data settings
+data:
+  root: "./data/dimer"
+  train_xyz: "train-id0.xyz"
+  val_xyz: "test-id0.xyz"
+  seed: 7
+
+# Model architecture
+model:
+  num_elements: 10
+  sphere_channels: 128
+  hidden_channels: 128
+  edge_channels: 128
+  lmax: 3
+  mmax: 2
+  num_layers: 3
+  cutoff: 5.0
+  max_neighbors: 50
+  num_distance_basis: 512
+  direct_forces: true
+  irreps: true
+  ewald_hyperparams:
+    k_cutoff: 0.6
+    delta_k: 0.2
+    num_k_rbf: 128
+    downprojection: 8
+    num_hidden: 1
+
+# Training settings
+training:
+  epochs: 1000
+  batch_size: 1
+  eval_batch_size: 1
+  lr: 0.01
+  weight_decay: 0.0
+  amsgrad: true
+  loss_type: "mse"
+  lr_warmup_steps: 100
+  lr_warmup_start_factor: 0.001
+  lr_scheduler: "step"
+  lr_step_size: 15
+  lr_gamma: 0.9
+  lr_min: 1.0e-6
+  clip_grad: 10.0
+  energy_weight: 1.0
+  force_weight: 100.0
+  print_freq: 1
+  top_k_checkpoints: 3
+
+# Output settings
+output:
+  base_dir: "./runs/dimer_escn_md_irreps"
+  ckpt_dir: "checkpoints"
+  log_dir: "logs"
+  save_last: true
+
+# System settings
+system:
+  cuda: true
+  num_workers: 0
+  deterministic: true
+  gpus: [0]
+  distributed: false
+  dist_backend: "nccl"
+  find_unused_parameters: false

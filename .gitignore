@@ -1,0 +1,37 @@
+# Data
+data/
+!data/.gitkeep
+
+# Training outputs
+runs/
+runs_*/
+checkpoints/
+logs/
+logs_*/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# PyTorch
+*.pt
+*.pth
+!fairchem/core/models/uma/Jd.pt
+!scaling_factors/**/*.pt
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+.claude
+checkpoint/

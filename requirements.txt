@@ -1,0 +1,12 @@
+torch>=1.13.1
+torch-geometric>=2.2.0
+torch-scatter
+e3nn
+numpy
+pyyaml
+tqdm
+tensorboard
+pytorch-lightning>=2.0.0
+matplotlib
+ase>=3.21.1
+lmdb
