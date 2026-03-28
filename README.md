@@ -29,14 +29,7 @@ pip install -e .
 Train the eSCN-MD Irreps model on the MD22 molecular dynamics benchmark:
 
 ```bash
-# Single GPU
 python train_md22.py --config configs/md22/escn_md_irreps.yaml
-
-# Multi-GPU (DDP)
-python train_md22.py --config configs/md22/escn_md_irreps.yaml --gpus 0,1
-
-# Override molecule and enable Ewald blocks
-python train_md22.py --molecule DHA --use-ewald
 ```
 
 ### AIMD-Chignolin
@@ -54,6 +47,16 @@ python train_chig.py --config configs/chig/chig_escn.yaml --gpus 0,1
 python train_chig.py --irreps
 ```
 
+### Dimer
+
+Train the eSCN-MD Irreps model on the charged dimer interaction energy/forces dataset:
+
+```bash
+# Single GPU
+python train_dimer.py --config configs/dimer/escn_md_irreps.yaml
+
+```
+
 ### OC20
 
 Train the eSCN model on the OC20 catalysis dataset:
@@ -67,9 +70,6 @@ torchrun --nproc_per_node=2 train_oc20.py
 ```
 
 ## Data Setup
-
-### MD22
-Data is automatically downloaded from [quantum-machine.org](http://www.quantum-machine.org/gdml/data/npz/) when first running training.
 
 ### AIMD-Chignolin
 Place the AIMD-Chignolin dataset under `./data/smaller_Chig_AIMD/` with the following structure:
@@ -90,6 +90,7 @@ Download the OC20 S2EF dataset and place it under `./data/s2ef/`. See [OC20 docu
 EquiEwald/
 ├── train_md22.py          # MD22 training script
 ├── train_chig.py          # AIMD-Chig training script
+├── train_dimer.py         # Dimer training script
 ├── train_oc20.py          # OC20 training script
 ├── configs/               # Configuration files
 ├── datasets/              # Dataset loaders
