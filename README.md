@@ -22,6 +22,10 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+## Hardware
+
+Unless otherwise specified, the experiments in this repository were conducted on a single NVIDIA GeForce RTX 4090 GPU.
+
 ## Training
 
 ### MD22
