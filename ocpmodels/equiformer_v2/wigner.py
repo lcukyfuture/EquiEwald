@@ -5,7 +5,15 @@ import torch
 # Borrowed from e3nn @ 0.4.0:
 # https://github.com/e3nn/e3nn/blob/0.4.0/e3nn/o3/_wigner.py#L10
 # _Jd is a list of tensors of shape (2l+1, 2l+1)
-_Jd = torch.load(os.path.join(os.path.dirname(__file__), "Jd.pt"))
+_local_jd = os.path.join(os.path.dirname(__file__), "Jd.pt")
+_shared_jd = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "fairchem", "core", "models", "uma", "Jd.pt")
+)
+_jd_path = _local_jd if os.path.isfile(_local_jd) else _shared_jd
+try:
+    _Jd = torch.load(_jd_path, weights_only=True)
+except TypeError:
+    _Jd = torch.load(_jd_path)
 
 
 # Borrowed from e3nn @ 0.4.0:

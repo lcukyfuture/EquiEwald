@@ -1,0 +1,39 @@
+seed: 7
+data_path: data/nacl/raw/ML_AB_NaCl_liquid_Extract.xyz
+output_dir: runs/nacl_escn_irreps_pbc
+unique_output_dir: true
+run_name: escn_irreps_molten_nacl_pbc
+valid_fraction: 0.1
+train_fraction: null
+cutoff: 5.29
+batch_size: 4
+num_epochs: 500
+lr: 5.0e-4
+weight_decay: 0.0
+amsgrad: true
+lr_step_size: 15
+lr_gamma: 0.9
+energy_weight: 1.0
+force_weight: 500.0
+grad_clip_norm: 10.0
+patience: 30
+min_delta: 1.0e-4
+max_frames: null
+smoke: false
+resume: null
+save_best_history: false
+
+model:
+  sphere_channels: 128
+  lmax: 3
+  mmax: 2
+  max_neighbors: 80
+  num_layers: 3
+  hidden_channels: 128
+  edge_channels: 128
+  num_distance_basis: 512
+  num_k_x: 1
+  num_k_y: 1
+  num_k_z: 3
+  downprojection: 8
+  num_hidden: 1
