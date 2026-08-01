@@ -46,7 +46,7 @@ from fairchem.core.models.utils.irreps import cg_change_mat, irreps_sum
 
 from .escn_md_block import eSCNMD_Block
 try:
-    from fairchem.core.models.ewald_block_irreps_md22 import EwaldBlock
+    from fairchem.core.models.ewald_block_irreps import EwaldBlock
 except ImportError:
     EwaldBlock = None
 

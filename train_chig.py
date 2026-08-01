@@ -73,7 +73,7 @@ class ChigESCNLightningModule(pl.LightningModule):
         self.register_buffer('task_mean', torch.tensor(task_mean, dtype=torch.float32))
         self.register_buffer('task_std', torch.tensor(task_std, dtype=torch.float32))
         
-        # Loss functions (L1Loss/MAE for training, consistent with MD22)
+        # Loss functions (L1Loss/MAE for training)
         self.energy_criterion = nn.L1Loss()
         self.force_criterion = nn.L1Loss()
         

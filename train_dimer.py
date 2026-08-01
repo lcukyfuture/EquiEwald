@@ -2,7 +2,7 @@
 """
 Dimer training script for eSCN-MD model with Multi-GPU support.
 
-Adapted from train_md22.py for charged dimer interaction energy/forces.
+Trains on charged dimer interaction energies and forces.
 Supports MSE/MAE loss, StepLR/CosineAnnealing scheduler, LR warmup,
 per-atom RMSE/MAE metrics, and top-K checkpoint saving.
 """
