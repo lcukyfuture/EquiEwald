@@ -288,7 +288,7 @@ def train_one_epoch(
 
         # Compute per-atom metrics (matching source train_escn_dimer.py)
         with torch.no_grad():
-            natoms = data.natoms.float().view(-1, 1)
+            natoms = data.natoms.float().view(-1)
             e_mae = torch.mean(torch.abs(data.y / natoms - pred_energy.detach() / natoms)).item()
             f_mae = torch.mean(torch.abs(data.force - pred_forces.detach())).item()
             e_mse = torch.mean((data.y / natoms - pred_energy.detach() / natoms) ** 2).item()
@@ -390,7 +390,7 @@ def evaluate(
         loss = train_cfg['energy_weight'] * loss_e + train_cfg['force_weight'] * loss_f
 
         # Per-atom metrics
-        natoms = data.natoms.float().view(-1, 1)
+        natoms = data.natoms.float().view(-1)
         e_mae = torch.mean(torch.abs(data.y / natoms - pred_energy.detach() / natoms)).item()
         f_mae = torch.mean(torch.abs(data.force - pred_forces.detach())).item()
         e_mse = torch.mean((data.y / natoms - pred_energy.detach() / natoms) ** 2).item()
@@ -450,12 +450,40 @@ def evaluate(
     return mae_meters, mse_meters, loss_meters, global_step
 
 
+def build_models(model_cfg, device):
+    """Construct the same backbone and head for training and evaluation."""
+    backbone = eSCNMDBackbone(
+        max_num_elements=model_cfg.get('num_elements', 10),
+        sphere_channels=model_cfg.get('sphere_channels', 128),
+        lmax=model_cfg.get('lmax', 3),
+        mmax=model_cfg.get('mmax', 2),
+        cutoff=model_cfg.get('cutoff', 5.0),
+        max_neighbors=model_cfg.get('max_neighbors', 50),
+        num_layers=model_cfg.get('num_layers', 3),
+        hidden_channels=model_cfg.get('hidden_channels', 128),
+        edge_channels=model_cfg.get('edge_channels', 128),
+        regress_forces=True,
+        direct_forces=model_cfg.get('direct_forces', True),
+        use_pbc=False,
+        always_use_pbc=False,
+        otf_graph=False,
+        dataset_list=['dimer'],
+        num_distance_basis=model_cfg.get('num_distance_basis', 512),
+        ewald_hyperparams=model_cfg.get('ewald_hyperparams'),
+        irreps=model_cfg.get('irreps', True),
+    ).to(device)
+
+    head = MLP_EFS_Head(backbone, wrap_property=True).to(device)
+
+    return backbone, head
+
+
 def train_worker(rank, world_size, config):
     """Worker function for each GPU process."""
     if world_size > 1:
         torch.cuda.set_device(rank)
         setup_distributed(rank, world_size, backend=config['system'].get('dist_backend', 'nccl'))
-    else:
+    elif config['system'].get('cuda', True) and torch.cuda.is_available():
         torch.cuda.set_device(0)
 
     data_cfg = config['data']
@@ -501,7 +529,7 @@ def train_worker(rank, world_size, config):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if system_cfg.get('cuda', True) and torch.cuda.is_available() else "cpu")
     if rank == 0:
         logger.info(f"Using device: {device}")
 
@@ -542,28 +570,7 @@ def train_worker(rank, world_size, config):
     if rank == 0:
         logger.info("Creating eSCN-MD model...")
 
-    backbone = eSCNMDBackbone(
-        max_num_elements=model_cfg.get('num_elements', 10),
-        sphere_channels=model_cfg.get('sphere_channels', 128),
-        lmax=model_cfg.get('lmax', 3),
-        mmax=model_cfg.get('mmax', 2),
-        cutoff=model_cfg.get('cutoff', 5.0),
-        max_neighbors=model_cfg.get('max_neighbors', 50),
-        num_layers=model_cfg.get('num_layers', 3),
-        hidden_channels=model_cfg.get('hidden_channels', 128),
-        edge_channels=model_cfg.get('edge_channels', 128),
-        regress_forces=True,
-        direct_forces=model_cfg.get('direct_forces', True),
-        use_pbc=False,
-        always_use_pbc=False,
-        otf_graph=False,
-        dataset_list=['dimer'],
-        num_distance_basis=model_cfg.get('num_distance_basis', 512),
-        ewald_hyperparams=model_cfg.get('ewald_hyperparams'),
-        irreps=model_cfg.get('irreps', True),
-    ).to(device)
-
-    head = MLP_EFS_Head(backbone, wrap_property=True).to(device)
+    backbone, head = build_models(model_cfg, device)
 
     if world_size > 1:
         backbone = DDP(
@@ -837,10 +844,23 @@ def main():
     config['timestamp'] = time.strftime("%Y%m%d-%H%M%S")
 
     if args.mode == "test":
-        print(f"\n{'=' * 80}")
-        print("Running in TEST mode - Not implemented yet")
-        print(f"{'=' * 80}\n")
-        sys.exit(1)
+        checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
+        # Architecture and normalization must come from the saved checkpoint.
+        config = merge_args_with_config(args, checkpoint['config'])
+        device = torch.device("cuda" if config['system'].get('cuda', True) and torch.cuda.is_available() else "cpu")
+        backbone, head = build_models(config['model'], device)
+        backbone.load_state_dict(checkpoint['backbone_state_dict'])
+        head.load_state_dict(checkpoint['head_state_dict'])
+        data_cfg = config['data']
+        dataset = DimerDataset(data_cfg['root'], data_cfg['val_xyz'], split="test")
+        loader = DataLoader(dataset, batch_size=config['training']['eval_batch_size'], shuffle=False)
+        criterion = nn.MSELoss() if config['training'].get('loss_type', 'mse') == 'mse' else nn.L1Loss()
+        mae, mse, losses, _ = evaluate(config, backbone, head, criterion, criterion,
+                                       loader, device, split_name="evaluation")
+        print(f"Evaluation samples: {len(dataset)}; energy metrics are per atom")
+        print(f"energy_MAE={mae['energy'].avg:.8f} force_MAE={mae['force'].avg:.8f} "
+              f"energy_RMSE={math.sqrt(mse['energy'].avg):.8f} "
+              f"force_RMSE={math.sqrt(mse['force'].avg):.8f} loss={losses['total'].avg:.8f}")
     else:
         data_cfg = config['data']
         train_cfg = config['training']
@@ -869,7 +889,8 @@ def main():
                 if len(system_cfg.get('gpus', [])) > 0:
                     device_id = system_cfg['gpus'][0]
                     print(f"Starting single GPU training on GPU {device_id}")
-                    torch.cuda.set_device(device_id)
+                    # CUDA_VISIBLE_DEVICES remaps the chosen physical GPU to 0.
+                    torch.cuda.set_device(0)
             train_worker(0, 1, config)
 
 

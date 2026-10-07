@@ -4,8 +4,8 @@
 # Data settings
 data:
   root: "./data/dimer"
-  train_xyz: "train-id0.xyz"
-  val_xyz: "test-id0.xyz"
+  train_xyz: "train-id5.xyz"
+  val_xyz: "test-id5.xyz"
   seed: 7
 
 # Model architecture

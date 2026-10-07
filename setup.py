@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from pathlib import Path
 
 setup(
     name="equiewald",
@@ -13,5 +14,10 @@ setup(
     package_data={
         "fairchem": ["core/models/uma/Jd.pt"],
     },
-    python_requires=">=3.9",
+    python_requires=">=3.10",
+    install_requires=[
+        line.strip()
+        for line in Path(__file__).with_name('requirements.txt').read_text().splitlines()
+        if line.strip() and not line.lstrip().startswith('#')
+    ],
 )

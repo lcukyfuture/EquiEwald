@@ -167,7 +167,6 @@ class eSCN(BaseModel):
                     self.num_k_y,
                     self.num_k_z,
                 )
-                print(f"DEBUG Irreps: num_k_degrees_of_freedom (PBC) = {self.num_k_degrees_of_freedom}")
                 self.k_rbf_values = None
                 self.delta_k = None
 

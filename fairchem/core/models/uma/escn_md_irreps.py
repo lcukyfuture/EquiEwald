@@ -149,7 +149,7 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
         ), "the dataset list is empty, please add it to the model backbone config"
 
         # rotation utils
-        Jd_list = torch.load(os.path.join(os.path.dirname(__file__), "Jd.pt"))
+        Jd_list = torch.load(os.path.join(os.path.dirname(__file__), "Jd.pt"), weights_only=True)
         for l in range(self.lmax + 1):
             self.register_buffer(f"Jd_{l}", Jd_list[l])
         self.sph_feature_size = int((self.lmax + 1) ** 2)
@@ -552,7 +552,6 @@ class eSCNMDBackbone(nn.Module, MOLEInterface):
     def forward(self, data_dict) -> dict[str, torch.Tensor]:
         # TODO pos_svd_frame
         if self.irreps:
-            print("irreps")
             data_dict["atomic_numbers"] = data_dict["atomic_numbers"].long()
             data_dict["atomic_numbers_full"] = data_dict["atomic_numbers"]
             data_dict["batch_full"] = data_dict["batch"]

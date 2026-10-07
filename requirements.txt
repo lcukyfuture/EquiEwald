@@ -1,12 +1,21 @@
-torch>=1.13.1
-torch-geometric>=2.2.0
-torch-scatter
-e3nn
-numpy
-pyyaml
-tqdm
-tensorboard
-pytorch-lightning>=2.0.0
-matplotlib
-ase>=3.21.1
-lmdb
+# Install torch and PyG extension wheels first; see README.md.
+torch==2.5.1
+torch-geometric==2.6.1
+torch-scatter==2.1.2
+torch-cluster==1.6.3
+e3nn==0.5.6
+numpy==1.26.4
+scipy==1.14.1
+PyYAML==6.0.3
+tqdm==4.67.1
+tensorboard==2.18.0
+pytorch-lightning==2.4.0
+torchmetrics==1.6.1
+torchtnt==0.2.4
+# torchtnt imports pkg_resources, which newer setuptools removed.
+setuptools==75.8.0
+matplotlib==3.9.4
+ase==3.23.0
+lmdb==1.6.2
+numba==0.61.0
+wandb==0.19.6

@@ -63,7 +63,9 @@ class DimerDataset(InMemoryDataset):
             pos = torch.as_tensor(atoms.get_positions(), dtype=torch.float32)
             atomic_numbers = torch.as_tensor(atoms.get_atomic_numbers(), dtype=torch.long)
             energy = torch.tensor([atoms.info["inter_energy"]], dtype=torch.float32)
-            force = torch.as_tensor(atoms.arrays["forces"], dtype=torch.float32)
+            # Recent ASE versions store standard energy/force fields in the
+            # SinglePointCalculator rather than atoms.arrays.
+            force = torch.as_tensor(atoms.get_forces(), dtype=torch.float32)
             natoms = torch.tensor([len(atoms)], dtype=torch.long)
 
             data = Data(

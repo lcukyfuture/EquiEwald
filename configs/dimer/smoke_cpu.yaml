@@ -1,0 +1,27 @@
+# Small verification run on the bundled id5 data; not a paper experiment.
+model:
+  sphere_channels: 8
+  hidden_channels: 8
+  edge_channels: 8
+  lmax: 2
+  mmax: 2
+  num_layers: 1
+  num_distance_basis: 16
+  ewald_hyperparams:
+    k_cutoff: 0.6
+    delta_k: 0.3
+    num_k_rbf: 8
+    downprojection: 4
+    num_hidden: 0
+training:
+  epochs: 1
+  batch_size: 2
+  eval_batch_size: 2
+  lr: 0.0001
+  print_freq: 25
+output:
+  base_dir: ./runs/dimer_smoke
+system:
+  cuda: false
+  gpus: []
+  num_workers: 0

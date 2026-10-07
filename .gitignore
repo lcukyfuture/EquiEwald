@@ -35,3 +35,8 @@ Thumbs.db
 .ipynb_checkpoints/
 .claude
 checkpoint/
+.venv/
+.pytest_cache/
+.ruff_cache/
+validation/local/
+*.whl

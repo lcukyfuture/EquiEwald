@@ -32,8 +32,7 @@ def parse_args():
     parser.add_argument(
         "--checkpoint",
         type=str,
-        default="/home/zhanglingfeng/Research/EwaldMP/checkpoints/"
-                "2025-12-26-13-15-44-escn_oc20_ewald_irreps/best_checkpoint.pt",
+        required=True,
         help="Path to the checkpoint file (.pt)",
     )
     parser.add_argument(

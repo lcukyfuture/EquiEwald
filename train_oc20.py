@@ -4,11 +4,11 @@ Only validates on val-id split where both adsorbate and catalyst compositions ar
 """
 
 import os
+import argparse
 import torch
 import torch.distributed as dist
 
 local_rank = int(os.environ.get("LOCAL_RANK", 0))
-torch.cuda.set_device(local_rank)
 
 import torch_geometric
 import logging
@@ -25,15 +25,19 @@ from ocpmodels.trainers import ForcesTrainer
 
 def main():
     """Main function for OC20 training and val-id validation"""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--config', default='configs/oc20/escn_ewald.yml')
+    args = parser.parse_args()
+    if not torch.cuda.is_available():
+        parser.error('OC20 training requires an NVIDIA CUDA GPU. Use the CPU smoke tests to check the model installation.')
+    torch.cuda.set_device(local_rank)
 
     # Initialize distributed training if not already initialized
     if not dist.is_initialized():
         if "RANK" not in os.environ:
             os.environ["RANK"] = str(local_rank)
         if "WORLD_SIZE" not in os.environ:
-            cuda_visible = os.environ.get("CUDA_VISIBLE_DEVICES", "")
-            world_size = len(cuda_visible.split(",")) if cuda_visible else 1
-            os.environ["WORLD_SIZE"] = str(world_size)
+            os.environ["WORLD_SIZE"] = "1"
         if "MASTER_ADDR" not in os.environ:
             os.environ["MASTER_ADDR"] = "localhost"
         if "MASTER_PORT" not in os.environ:
@@ -50,8 +54,7 @@ def main():
     setup_logging()
 
     # Load config
-    config_dir = "configs/oc20"
-    config_path = os.path.join(config_dir, "escn_ewald.yml")
+    config_path = args.config
 
     torch.cuda.empty_cache()
     conf = load_config(config_path)[0]

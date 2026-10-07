@@ -118,7 +118,7 @@ class EwaldBlock(torch.nn.Module):
             self.ewald_scale_sum = None
 
         self.k_features_projection = Dense(
-            31,  # This maps to 'in_features'
+            shared_downprojection.linear.in_features if use_pbc else self.channel,
             self.channel,               # This maps to 'out_features'
             activation=None,
             bias=False
