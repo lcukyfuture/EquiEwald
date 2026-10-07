@@ -11,9 +11,7 @@ establish the accuracy reported in the paper.
 
 ## Installation
 
-Use a fresh Python 3.10–3.12 environment. The release was checked with Python
-3.12 on an Apple ARM CPU. CUDA training and multi-GPU execution require separate
-validation on the target NVIDIA hardware. Run commands from the repository root.
+Use a fresh Python 3.10–3.12 environment. Run commands from the repository root.
 
 ```bash
 python -m venv .venv
@@ -21,17 +19,8 @@ source .venv/bin/activate
 python -m pip install setuptools==75.8.0 wheel==0.45.1
 ```
 
-Choose **one** PyTorch installation. The PyTorch version and PyG extension wheel
-index must match; do not mix extensions from a different Torch/CUDA build.
-
-**CPU (Linux or macOS):**
-
-```bash
-# On Linux add: --index-url https://download.pytorch.org/whl/cpu
-python -m pip install torch==2.5.1
-python -m pip install torch-scatter==2.1.2 torch-cluster==1.6.3 \
-  -f https://data.pyg.org/whl/torch-2.5.1+cpu.html
-```
+The PyTorch version and PyG extension wheel index must match; do not mix
+extensions from a different Torch/CUDA build.
 
 **NVIDIA CUDA 12.1 (Linux; installation recipe, not locally verified):**
 
@@ -47,7 +36,6 @@ Then install the pinned runtime and test dependencies:
 python -m pip install -r requirements-dev.txt
 python -m pip install --no-build-isolation -e .
 python -m pip check
-python scripts/run_smoke_tests.py
 ```
 
 The vendored `fairchem`, `ocpmodels`, and `datasets` packages are included in the
@@ -56,27 +44,15 @@ the same environment. Optional legacy preprocessing/HPO utilities may require
 `pymatgen`/`ray`; neither is needed by the smoke tests. The release does not
 require `torchvision` or the optional `fairchem_cpp` kernels.
 
-## Quick check with included data
-
-The default Dimer configuration uses the included `id5` XYZ files: 10 training
-structures and 3 validation structures, each with 24 atoms.
-For a small one-epoch CPU run with an Ewald block:
-
-```bash
-OMP_NUM_THREADS=1 python train_dimer.py \
-  --config configs/dimer/escn_md_irreps.yaml \
-  --override configs/dimer/smoke_cpu.yaml
-```
-
-This writes logs and best/last checkpoints under `runs/dimer_smoke/`. The reduced
-channels, layer count, and epoch count are for execution checks only. The file
-named `test-id5.xyz` is used as the validation input by the supplied training
-script; it is **not an independent held-out test** for model selection. Supply a
-separate validation split for a protocol requiring independent test evaluation.
-
 ## Training and evaluation
 
 ### Dimer
+
+The default configuration uses the included `id5` XYZ files: 10 training
+structures and 3 validation structures, each with 24 atoms. The file named
+`test-id5.xyz` is used as the validation input by the supplied training script;
+it is **not an independent held-out test** for model selection. Supply a
+separate validation split for a protocol requiring independent test evaluation.
 
 ```bash
 python train_dimer.py --config configs/dimer/escn_md_irreps.yaml
@@ -163,7 +139,7 @@ not bundled.
 ## Layout
 
 ```text
-configs/             Experiment and CPU smoke configurations
+configs/             Experiment and smoke-test configurations
 datasets/            Dimer and Chignolin readers
 fairchem/            eSCN-MD backbone and long-range blocks
 ocpmodels/           OC20 framework and eSCN model
@@ -172,7 +148,7 @@ experiments_data/    Previously supplied plotting tables (not regenerated here)
 train_*.py           Training entry points
 infer_*.py           Chignolin and OC20 evaluation entry points
 evaluate_nacl.py     Periodic checkpoint evaluation
-tests/               Small CPU execution and regression checks
+tests/               Execution and regression checks
 validation/          Verification environment record
 LICENSES/            Licenses for bundled upstream code
 ```
